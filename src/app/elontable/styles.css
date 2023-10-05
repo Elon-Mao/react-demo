@@ -1,0 +1,85 @@
+:root {
+  --border: 1px solid #ccc;
+  --font-size: 16px;
+  --font-family: Arial, sans-serif;
+}
+
+.table {
+  border-top: var(--border);
+  border-left: var(--border);
+  margin: 1px;
+  display: flex;
+  flex-direction: column;
+  width: min-content;
+  height: min-content;
+  font-size: var(--font-size);
+  font-family: var(--font-family);
+  position: relative;
+}
+
+.table-selection {
+  position: absolute;
+  box-shadow: 0 0 2px 2px blue;
+  pointer-events: none;
+}
+
+.table-selection>div {
+  position: absolute;
+  background-color: rgba(0, 157, 255, 0.2);
+}
+
+.selected-cell-background {
+  background-color: white;
+}
+
+.table-head {
+  background-color: #f2f2f2;
+  display: flex;
+  width: min-content;
+}
+
+.table-column {
+  border-bottom: var(--border);
+  border-right: var(--border);
+}
+
+.table-header {
+  padding: 8px;
+  text-align: center;
+}
+
+.table-row {
+  display: flex;
+  width: min-content;
+}
+
+.table-cell-wrapper {
+  border-bottom: var(--border);
+  border-right: var(--border);
+}
+
+.table-cell {
+  padding: 8px;
+  background-color: white;
+}
+
+.table-cell>div {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  user-select: none;
+}
+
+.table-input {
+  padding: 0;
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: var(--font-size);
+  font-family: var(--font-family);
+}
+
+.copy-input {
+  position: absolute;
+  left: -9999px;
+}

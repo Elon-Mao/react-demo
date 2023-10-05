@@ -1,95 +1,41 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client'
 
-export default function Home() {
+import React, { useState } from 'react'
+import ElonTable from './elontable/ElonTable'
+import ElonTableColumn from './elontable/ElonTableColumn'
+
+const App: React.FC = () => {
+  const initialData = [
+    { name: 'Alice', age: 25, email: 'alice@example.com' },
+    { name: 'Bob', age: 30, email: 'bob@example.com' },
+    { name: 'Charlie', age: 35, email: 'charlie@example.com' },
+    { name: 'Charlie', age: 35, email: 'charlie@example.com' },
+    { name: 'Charlie', age: 35, email: 'charlie@example.com' },
+    { name: 'Charlie', age: 35, email: 'charlie@example.com' },
+    { name: 'Charlie', age: 35, email: 'charlie@example.com' }
+  ]
+
+  const [data, setData] = useState(initialData)
+
+  const handleUpdateData = (newData: any) => {
+    setData(newData)
+  }
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    <div className="App">
+      <ElonTable data={data} onUpdateData={handleUpdateData}>
+        <ElonTableColumn dataKey="name" width='150px' headerRender={() => (
+          <h3 style={{ margin: '8px' }}>Name(disabled)</h3>
+        )} cellRender={({ data, rowIndex, columnProps }) => (
+          <div className='table-cell' style={{ cursor: 'not-allowed', userSelect: 'none' }}>
+            {data[rowIndex][columnProps.dataKey]}
+          </div>
+        )} />
+        <ElonTableColumn dataKey="age" />
+        <ElonTableColumn dataKey="email" width="300px" />
+      </ElonTable>
+    </div>
   )
 }
+
+export default App

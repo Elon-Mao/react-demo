@@ -1,0 +1,113 @@
+import React, { useEffect } from 'react'
+
+interface CellWrapper {
+  rowIndex: number
+  columnIndex: number
+  target: HTMLDivElement
+}
+
+export interface TableSelection {
+  mouseDownCell: CellWrapper
+  mouseMoveCell: CellWrapper
+}
+
+interface TableSelectionProps {
+  selection?: TableSelection
+  copyText: string
+}
+
+const ElonTableSelection: React.FC<TableSelectionProps> = ({ selection, copyText }) => {
+  useEffect(() => {
+    console.log('copyText:', copyText)
+    const input = document.getElementById('copyInput') as HTMLInputElement
+    input.value = copyText
+    input.select()
+    try {
+      const successful = document.execCommand('copy')
+      if (successful) {
+        console.log('已复制到剪贴板')
+      } else {
+        console.error('复制到剪贴板失败')
+      }
+    } catch (err) {
+      console.error('复制到剪贴板失败', err)
+    }
+    input.value = ''
+  }, [copyText])
+
+  if (!selection) {
+    return (
+      <>
+        <input id="copyInput" className="copy-input"></input>
+      </>
+    )
+  }
+  const mouseDownCellRef = selection.mouseDownCell.target
+  const mouseMoveCellRef = selection.mouseMoveCell.target
+  let top, height, colorTop, colorHeight, blankTop, blankHeight
+  let left, width, colorLeft, colorWidth, blankLeft, blankWidth
+  if (selection.mouseDownCell.rowIndex > selection.mouseMoveCell.rowIndex) {
+    blankTop = mouseDownCellRef.offsetTop - mouseMoveCellRef.offsetTop
+    blankHeight = mouseDownCellRef.clientHeight
+    top = mouseMoveCellRef.offsetTop
+    height = blankTop + blankHeight
+    colorTop = 0
+    colorHeight = blankTop
+  } else {
+    blankTop = 0
+    blankHeight = mouseDownCellRef.clientHeight
+    top = mouseDownCellRef.offsetTop
+    height = mouseMoveCellRef.offsetTop - mouseDownCellRef.offsetTop + mouseMoveCellRef.clientHeight
+    colorTop = blankHeight
+    colorHeight = height - blankHeight
+  }
+  if (selection.mouseDownCell.columnIndex > selection.mouseMoveCell.columnIndex) {
+    blankLeft = mouseDownCellRef.offsetLeft - mouseMoveCellRef.offsetLeft
+    blankWidth = mouseDownCellRef.clientWidth
+    left = mouseMoveCellRef.offsetLeft
+    width = blankLeft + blankWidth
+    colorLeft = 0
+    colorWidth = blankLeft
+  } else {
+    blankLeft = 0
+    blankWidth = mouseDownCellRef.clientWidth
+    left = mouseDownCellRef.offsetLeft
+    width = mouseMoveCellRef.offsetLeft - mouseDownCellRef.offsetLeft + mouseMoveCellRef.clientWidth
+    colorLeft = blankWidth
+    colorWidth = width - blankWidth
+  }
+
+  return (
+    <>
+      <input id="copyInput" className="copy-input"></input>
+      <div className="table-selection" style={{
+        top: top + 'px',
+        left: left + 'px',
+        height: height + 'px',
+        width: width + 'px'
+      }}>
+        <div style={{
+          top: colorTop + 'px',
+          left: blankLeft + 'px',
+          height: colorHeight + 'px',
+          width: blankWidth + 'px'
+        }}></div>
+        <div style={{
+          top: blankTop + 'px',
+          left: colorLeft + 'px',
+          height: blankHeight + 'px',
+          width: colorWidth + 'px'
+        }}></div>
+        <div style={{
+          top: colorTop + 'px',
+          left: colorLeft + 'px',
+          height: colorHeight + 'px',
+          width: colorWidth + 'px'
+        }}></div>
+      </div>
+    </>
+  )
+}
+
+export default ElonTableSelection;
+
