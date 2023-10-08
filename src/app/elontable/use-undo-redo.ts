@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { enablePatches, Draft, produceWithPatches, applyPatches, Patch, Objectish } from 'immer'
 
 export declare type UpdateFunction<S> = (recipe: (draft: Draft<S>) => void) => void
@@ -19,7 +19,7 @@ const useUndoRedo = <S extends Objectish>(
   const _changes = useRef<Patch[][]>([])
   const _inverseChanges = useRef<Patch[][]>([])
 
-  const updater: UpdateFunction<S> = (draft) => {
+  const updater: UpdateFunction<S> = useCallback((draft) => {
     const [nextState, patches, inversePatches] = produceWithPatches<S>(stateRef.current, draft)
     if (patches.length === 0) {
       return
@@ -35,25 +35,25 @@ const useUndoRedo = <S extends Objectish>(
     }
     setState(nextState)
     onchange(patches)
-  }
+  }, [])
 
-  const undo = () => {
+  const undo = useCallback(() => {
     if (_currentStep.current === 0) {
       return
     }
     const inverseChanges = _inverseChanges.current[--_currentStep.current]
     setState(applyPatches(stateRef.current, inverseChanges))
     onchange(inverseChanges)
-  }
+  }, [])
 
-  const redo = () => {
+  const redo = useCallback(() => {
     if (_currentStep.current >= _changes.current.length) {
       return
     }
     const changes = _changes.current[_currentStep.current++]
     setState(applyPatches(stateRef.current, changes))
     onchange(changes)
-  }
+  }, [])
   return [state, updater, undo, redo]
 }
 
