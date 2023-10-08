@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 
 interface CellWrapper {
   rowIndex: number
@@ -13,33 +13,12 @@ export interface TableSelection {
 
 interface TableSelectionProps {
   selection?: TableSelection
-  copyText: string
 }
 
-const ElonTableSelection: React.FC<TableSelectionProps> = ({ selection, copyText }) => {
-  useEffect(() => {
-    console.log('copyText:', copyText)
-    const input = document.getElementById('copyInput') as HTMLInputElement
-    input.value = copyText
-    input.select()
-    try {
-      const successful = document.execCommand('copy')
-      if (successful) {
-        console.log('已复制到剪贴板')
-      } else {
-        console.error('复制到剪贴板失败')
-      }
-    } catch (err) {
-      console.error('复制到剪贴板失败', err)
-    }
-    input.value = ''
-  }, [copyText])
-
+const ElonTableSelection: React.FC<TableSelectionProps> = ({ selection }) => {
   if (!selection) {
     return (
-      <>
-        <input id="copyInput" className="copy-input"></input>
-      </>
+      <></>
     )
   }
   const mouseDownCellRef = selection.mouseDownCell.target
@@ -79,7 +58,6 @@ const ElonTableSelection: React.FC<TableSelectionProps> = ({ selection, copyText
 
   return (
     <>
-      <input id="copyInput" className="copy-input"></input>
       <div className="table-selection" style={{
         top: top + 'px',
         left: left + 'px',
@@ -110,4 +88,3 @@ const ElonTableSelection: React.FC<TableSelectionProps> = ({ selection, copyText
 }
 
 export default ElonTableSelection;
-

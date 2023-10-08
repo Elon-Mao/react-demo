@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ColumnProps } from './ElonTableColumn'
 
 export interface CellProps {
@@ -17,6 +17,10 @@ const ElonTableCell: React.FC<CellProps> = ({
   const [isEditing, setIsEditing] = useState(false)
   const [inputValue, setInputValue] = useState(data[rowIndex][columnProps.dataKey])
 
+  useEffect(() => {
+    setInputValue(data[rowIndex][columnProps.dataKey])
+  }, [data, rowIndex, columnProps])
+
   const handleDoubleClick = () => {
     setIsEditing(true)
   }
@@ -29,7 +33,7 @@ const ElonTableCell: React.FC<CellProps> = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
   }
-
+  
   return (
     <div className="table-cell">{
       isEditing ? (

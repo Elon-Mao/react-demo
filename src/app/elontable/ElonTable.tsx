@@ -1,5 +1,6 @@
-import React, { ReactNode, useState, useEffect, useMemo } from 'react'
-import { useImmer } from 'use-immer'
+import React, { ReactNode, useState, useEffect, useMemo, useRef } from 'react'
+import { Patch } from 'immer'
+import { useUndoRedo } from './use-undo-redo'
 import { ColumnProps, columnDefaultProps } from './ElonTableColumn'
 import ElonTableSelection, { TableSelection } from './ElonTableSelection'
 import './styles.css'
@@ -7,34 +8,53 @@ import './styles.css'
 interface TableProps {
   data: any
   children: ReactNode
-  onUpdateData: (newData: any) => void
+  onUpdateData: (patches: Patch[]) => void
 }
 
-let selecting = false
-
 const ElonTable: React.FC<TableProps> = ({ data, children, onUpdateData }) => {
+  const [tableData, updateTableData, undoTableData, redoTableData] = useUndoRedo(data, onUpdateData)
   const [selection, setSelection] = useState<TableSelection>()
-  const [copyText, setCopyText] = useState('')
+  const tableDateRef = useRef(tableData)
+  tableDateRef.current = tableData
+  const selectionRef = useRef(selection)
+  selectionRef.current = selection
+  const selecting = useRef(false)
 
   useEffect(() => {
     const handleMouseDown = () => {
       console.log('clear select')
     }
     const handleMouseUp = () => {
-      selecting = false
+      selecting.current = false
     }
-    const handleKeydown = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.key === 'c' && selection) {
-        setCopyText('abcdef')
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey) {
+        switch (event.key) {
+          case 'c':
+            if (selectionRef.current) {
+              navigator.clipboard.writeText('qwer')
+            }
+            break
+          case 'z':
+            if (event.target === document.body) {
+              undoTableData()
+            }
+            break
+          case 'y':
+            if (event.target === document.body) {
+              redoTableData()
+            }
+            break
+        }
       }
     }
     addEventListener('mousedown', handleMouseDown)
     addEventListener('mouseup', handleMouseUp)
-    addEventListener('keydown', handleKeydown)
+    addEventListener('keydown', handleKeyDown)
     return () => {
       removeEventListener('mousedown', handleMouseDown)
       removeEventListener('mouseup', handleMouseUp)
-      removeEventListener('keydown', handleKeydown)
+      removeEventListener('keydown', handleKeyDown)
     }
   }, [])
 
@@ -42,14 +62,14 @@ const ElonTable: React.FC<TableProps> = ({ data, children, onUpdateData }) => {
     .map((column) => React.cloneElement(column, Object.assign({}, columnDefaultProps, column.props))), [children])
 
   const onUpdate = (rowIndex: number, dataKey: string, newValue: any) => {
-    const newData = [...data]
-    newData[rowIndex][dataKey] = newValue
-    onUpdateData(newData)
+    updateTableData(draft => {
+      draft[rowIndex][dataKey] = newValue
+    })
   }
 
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>, rowIndex: number, columnIndex: number) => {
     event.stopPropagation()
-    selecting = true
+    selecting.current = true
     const cell = {
       rowIndex,
       columnIndex,
@@ -62,7 +82,7 @@ const ElonTable: React.FC<TableProps> = ({ data, children, onUpdateData }) => {
   }
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>, rowIndex: number, columnIndex: number) => {
-    if (!selecting) {
+    if (!selecting.current) {
       return
     }
     setSelection({
@@ -74,15 +94,14 @@ const ElonTable: React.FC<TableProps> = ({ data, children, onUpdateData }) => {
       }
     })
   }
-
   return (
-    <div className="table" >
-      <ElonTableSelection selection={selection} copyText={copyText}></ElonTableSelection>
+    <div className="table">
+      <ElonTableSelection selection={selection}></ElonTableSelection>
       <div className="table-head">
         {columns}
       </div>
       <div className="table-body">
-        {data.map((_row: any, rowIndex: number) => (
+        {tableData.map((_row: any, rowIndex: number) => (
           <div className="table-row" key={rowIndex}>
             {columns.map((column, columnIndex) => {
               const CellRender = column.props.cellRender!
@@ -90,7 +109,7 @@ const ElonTable: React.FC<TableProps> = ({ data, children, onUpdateData }) => {
                 <div className="table-cell-wrapper" style={{ width: column.props.width }} key={columnIndex}
                   onMouseDown={(e) => handleMouseDown(e, rowIndex, columnIndex)}
                   onMouseMove={(e) => handleMouseMove(e, rowIndex, columnIndex)}>
-                  <CellRender data={data} rowIndex={rowIndex} columnProps={column.props} onUpdate={onUpdate} />
+                  <CellRender data={tableData} rowIndex={rowIndex} columnProps={column.props} onUpdate={onUpdate} />
                 </div>
               )
             })}

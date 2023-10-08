@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
+import { Patch } from 'immer'
 import ElonTable from './elontable/ElonTable'
 import ElonTableColumn from './elontable/ElonTableColumn'
 
 const App: React.FC = () => {
-  const initialData = [
+  const tableData = [
     { name: 'Alice', age: 25, email: 'alice@example.com' },
     { name: 'Bob', age: 30, email: 'bob@example.com' },
     { name: 'Charlie', age: 35, email: 'charlie@example.com' },
@@ -15,15 +16,13 @@ const App: React.FC = () => {
     { name: 'Charlie', age: 35, email: 'charlie@example.com' }
   ]
 
-  const [data, setData] = useState(initialData)
-
-  const handleUpdateData = (newData: any) => {
-    setData(newData)
+  const handleUpdateData = (patches: Patch[]) => {
+    console.log(patches)
   }
 
   return (
     <div className="App">
-      <ElonTable data={data} onUpdateData={handleUpdateData}>
+      <ElonTable data={tableData} onUpdateData={handleUpdateData}>
         <ElonTableColumn dataKey="name" width='150px' headerRender={() => (
           <h3 style={{ margin: '8px' }}>Name(disabled)</h3>
         )} cellRender={({ data, rowIndex, columnProps }) => (
