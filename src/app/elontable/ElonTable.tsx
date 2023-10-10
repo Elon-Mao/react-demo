@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react'
-import { Patch } from 'immer'
 import { Updater, useImmer } from 'use-immer'
 import { UpdateFunction, useUndoRedo } from './use-undo-redo'
 import ElonTableCell, { CellProps } from './ElonTableCell'
@@ -30,8 +29,7 @@ export interface TableProps<S extends AnyArray> {
 
 const useElonTable = <S extends AnyArray>(
   columnOptions: ColumnOption[],
-  data: S,
-  onUpdateData: (patches: Patch[]) => void = () => { }
+  data: S
 ): TableProps<S> => {
   const [columns, setColumns] = useImmer(columnOptions.map(columnOption => Object.assign({}, {
     width: '200px',
@@ -39,7 +37,7 @@ const useElonTable = <S extends AnyArray>(
     headerRender: ElonTableHeader,
     cellRender: ElonTableCell
   }, columnOption) as ColumnOption))
-  const [tableData, updateTableData, undoTableData, redoTableData] = useUndoRedo(data, onUpdateData)
+  const [tableData, updateTableData, undoTableData, redoTableData] = useUndoRedo(data)
   const [selection, setSelection] = useState<TableSelection>()
   return {
     columns,
@@ -111,18 +109,19 @@ const ElonTable = <S extends AnyArray>({
             }
             const row0 = selectionRef.current.mouseDownCell.rowIndex
             const column0 = selectionRef.current.mouseDownCell.columnIndex
-            const row1 = tableDataRef.current.length
-            const column1 = columns.length
             navigator.clipboard.readText().then((clipText) => {
               updateTableData(draft => {
-                clipText.split('\n').forEach((line, lineIndex) => {
+                clipText.split(/[\n\r]+/).forEach((line, lineIndex) => {
+                  if (!line) {
+                    return
+                  }
                   const rowIndex = row0 + lineIndex
                   if (draft[rowIndex] === undefined) {
-                    draft.push({ name: 'Charlie', age: 35, sex: 0, email: 'charlie@example.com' })
+                    draft[rowIndex] = {}
                   }
                   line.split('\t').forEach((text, textIndex) => {
                     const columnIndex = column0 + textIndex
-                    if (columnIndex < column1) {
+                    if (columnIndex < columns.length) {
                       draft[rowIndex][columns[columnIndex].dataKey] = text
                     }
                   })
@@ -132,9 +131,11 @@ const ElonTable = <S extends AnyArray>({
             break
           case 'z':
             undoTableData()
+            setSelection(undefined)
             break
           case 'y':
             redoTableData()
+            setSelection(undefined)
             break
           case 'a':
             event.preventDefault()
@@ -147,7 +148,6 @@ const ElonTable = <S extends AnyArray>({
                 columnIndex: 0,
                 target: tableBody.children[0].children[0] as HTMLDivElement
               },
-
               mouseMoveCell: {
                 rowIndex: maxRow,
                 columnIndex: maxColumn,

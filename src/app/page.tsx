@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import ElonTable, { useElonTable } from './elontable/ElonTable'
 import { CellProps } from './elontable/ElonTableCell'
 
@@ -17,21 +17,27 @@ const App: React.FC = () => {
     width: '100px',
     cellRender: SexCell
   }, {
-    dataKey: 'email',
-    width: '300px'
+    dataKey: 'birthday',
+    type: 'date',
   }], [
-    { name: 'Alice', age: 25, sex: 0, email: 'alice@example.com' },
-    { name: 'Bob', age: 30, sex: 1, email: 'bob@example.com' },
-    { name: 'Charlie', age: 35, sex: 0, email: 'charlie@example.com' }
-  ], (patches) => {
-    console.log(patches)
-  })
+    { name: 'Alice', age: 25, sex: 0, birthday: '1997-10-10' },
+    { name: 'Bob', age: 30, sex: 1, birthday: '1997-07-01' },
+    { name: 'Charlie', age: 35, sex: 0, birthday: '2001-02-27' }
+  ])
+
+  useEffect(() => {
+    console.log(tableProps.tableData)
+  }, [tableProps.tableData])
+
+  const tableDataRef = useRef(tableProps.tableData)
+  tableDataRef.current = tableProps.tableData
 
   return (
-    <div className="App">
+    <>
+      <span></span>
       <ElonTable {...tableProps}>
       </ElonTable>
-    </div>
+    </>
   )
 }
 

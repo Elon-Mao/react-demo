@@ -35,7 +35,7 @@ const ElonTableCell: React.FC<CellProps> = ({
   }
 
   return (
-    <div className="table-cell">{
+    <div className="table-cell" onDoubleClick={handleDoubleClick}>{
       isEditing || columnOption.type !== 'text' ? (
         <input
           value={inputValue}
@@ -44,7 +44,7 @@ const ElonTableCell: React.FC<CellProps> = ({
           onBlur={handleBlur}
           autoFocus={isEditing}
           className="table-input" />) : (
-        <div onDoubleClick={handleDoubleClick}>
+        <div title={inputValue}>
           {inputValue}
         </div>
       )

@@ -8,7 +8,6 @@ enablePatches()
 
 const useUndoRedo = <S extends Objectish>(
   initialValue: S,
-  onchange: (patches: Patch[]) => void = () => {},
   maxStep = 128
 ): UndoRedoHook<S> => {
   const [state, setState] = useState(initialValue)
@@ -34,7 +33,6 @@ const useUndoRedo = <S extends Objectish>(
       _currentStep.current--
     }
     setState(nextState)
-    onchange(patches)
   }, [])
 
   const undo = useCallback(() => {
@@ -43,7 +41,6 @@ const useUndoRedo = <S extends Objectish>(
     }
     const inverseChanges = _inverseChanges.current[--_currentStep.current]
     setState(applyPatches(stateRef.current, inverseChanges))
-    onchange(inverseChanges)
   }, [])
 
   const redo = useCallback(() => {
@@ -52,7 +49,6 @@ const useUndoRedo = <S extends Objectish>(
     }
     const changes = _changes.current[_currentStep.current++]
     setState(applyPatches(stateRef.current, changes))
-    onchange(changes)
   }, [])
   return [state, updater, undo, redo]
 }
