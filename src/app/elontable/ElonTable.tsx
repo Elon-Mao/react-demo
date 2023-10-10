@@ -1,13 +1,25 @@
-import React, { ReactNode, useState, useEffect, useMemo, useRef, Dispatch, SetStateAction } from 'react'
+import React, { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react'
 import { Patch } from 'immer'
+import { Updater, useImmer } from 'use-immer'
 import { UpdateFunction, useUndoRedo } from './use-undo-redo'
-import { ColumnProps, columnDefaultProps } from './ElonTableColumn'
+import ElonTableCell, { CellProps } from './ElonTableCell'
+import ElonTableHeader from './ElonTableHeader'
 import ElonTableSelection, { TableSelection } from './ElonTableSelection'
 import './styles.css'
 
 type AnyArray = Array<any>
 
+export interface ColumnOption {
+  dataKey: string
+  width?: string
+  type?: string
+  headerRender?: React.FC<ColumnOption>
+  cellRender?: React.FC<CellProps>
+}
+
 export interface TableProps<S extends AnyArray> {
+  columns: ColumnOption[]
+  setColumns: Updater<ColumnOption[]>
   tableData: S
   updateTableData: UpdateFunction<S>
   undoTableData: () => void
@@ -17,12 +29,21 @@ export interface TableProps<S extends AnyArray> {
 }
 
 const useElonTable = <S extends AnyArray>(
+  columnOptions: ColumnOption[],
   data: S,
   onUpdateData: (patches: Patch[]) => void = () => { }
 ): TableProps<S> => {
+  const [columns, setColumns] = useImmer(columnOptions.map(columnOption => Object.assign({}, {
+    width: '200px',
+    type: 'text',
+    headerRender: ElonTableHeader,
+    cellRender: ElonTableCell
+  }, columnOption) as ColumnOption))
   const [tableData, updateTableData, undoTableData, redoTableData] = useUndoRedo(data, onUpdateData)
   const [selection, setSelection] = useState<TableSelection>()
   return {
+    columns,
+    setColumns,
     tableData,
     updateTableData,
     undoTableData,
@@ -32,14 +53,10 @@ const useElonTable = <S extends AnyArray>(
   }
 }
 
-interface TablePropsWithChildren<S extends AnyArray> extends TableProps<S> {
-  children: ReactNode
-}
-
 const copyTable = (
   selection: TableSelection | undefined,
   tableData: AnyArray,
-  columns: React.ReactElement<ColumnProps>[]
+  columns: ColumnOption[]
 ) => {
   if (!selection) {
     return
@@ -56,18 +73,18 @@ const copyTable = (
   }
   navigator.clipboard.writeText(tableData.slice(row0, row1 + 1)
     .map(row => columns.slice(column0, column1 + 1)
-      .map((column: any) => row[column.props.dataKey]).join('\t')).join('\n'))
+      .map(column => row[column.dataKey]).join('\t')).join('\n'))
 }
 
 const ElonTable = <S extends AnyArray>({
+  columns,
   tableData,
   updateTableData,
   undoTableData,
   redoTableData,
   selection,
-  setSelection,
-  children
-}: TablePropsWithChildren<S>) => {
+  setSelection
+}: TableProps<S>) => {
   const tableRef = useRef<HTMLDivElement>(null)
   const tableDataRef = useRef(tableData)
   tableDataRef.current = tableData
@@ -106,7 +123,7 @@ const ElonTable = <S extends AnyArray>({
                   line.split('\t').forEach((text, textIndex) => {
                     const columnIndex = column0 + textIndex
                     if (columnIndex < column1) {
-                      draft[rowIndex][columns[columnIndex].props.dataKey] = text
+                      draft[rowIndex][columns[columnIndex].dataKey] = text
                     }
                   })
                 })
@@ -151,9 +168,6 @@ const ElonTable = <S extends AnyArray>({
     }
   }, [])
 
-  const columns = useMemo(() => (React.Children.toArray(children) as React.ReactElement<ColumnProps>[])
-    .map((column) => React.cloneElement(column, Object.assign({}, columnDefaultProps, column.props))), [children])
-
   const onUpdate = (rowIndex: number, dataKey: string, newValue: any) => {
     updateTableData(draft => {
       draft[rowIndex][dataKey] = newValue
@@ -196,19 +210,23 @@ const ElonTable = <S extends AnyArray>({
     <div className="table" ref={tableRef}>
       <ElonTableSelection selection={selection}></ElonTableSelection>
       <div className="table-head">
-        {columns}
+        {columns.map((column, columnIndex) => (
+          <div className="table-column" style={{ width: column.width }} key={columnIndex}>
+            {React.createElement(column.headerRender!, column)}
+          </div>
+        ))}
       </div>
       <div className="table-body">
-        {tableData.map((_row: any, rowIndex: number) => (
+        {tableData.map((_row, rowIndex) => (
           <div className="table-row" key={rowIndex}>
             {columns.map((column, columnIndex) => (
-              <div className="table-cell-wrapper" style={{ width: column.props.width }} key={columnIndex}
+              <div className="table-cell-wrapper" style={{ width: column.width }} key={columnIndex}
                 onMouseDown={e => handleMouseDown(e, rowIndex, columnIndex)}
                 onMouseMove={e => handleMouseMove(e, rowIndex, columnIndex)}>
-                {column.props.cellRender!({
+                {React.createElement(column.cellRender!, {
                   data: tableData,
                   rowIndex,
-                  columnProps: column.props,
+                  columnOption: column,
                   onUpdate
                 })}
               </div>

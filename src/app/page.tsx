@@ -2,10 +2,24 @@
 
 import React from 'react'
 import ElonTable, { useElonTable } from './elontable/ElonTable'
-import ElonTableColumn from './elontable/ElonTableColumn'
+import { CellProps } from './elontable/ElonTableCell'
 
 const App: React.FC = () => {
-  const tableProps = useElonTable([
+  const tableProps = useElonTable([{
+    dataKey: 'name',
+    headerRender: NameHeader
+  }, {
+    dataKey: 'age',
+    type: 'number',
+    width: '50px'
+  }, {
+    dataKey: 'sex',
+    width: '100px',
+    cellRender: SexCell
+  }, {
+    dataKey: 'email',
+    width: '300px'
+  }], [
     { name: 'Alice', age: 25, sex: 0, email: 'alice@example.com' },
     { name: 'Bob', age: 30, sex: 1, email: 'bob@example.com' },
     { name: 'Charlie', age: 35, sex: 0, email: 'charlie@example.com' }
@@ -13,30 +27,24 @@ const App: React.FC = () => {
     console.log(patches)
   })
 
-  const handleSexChange = (event: React.ChangeEvent<HTMLSelectElement>, rowIndex: number) => {
-    tableProps.updateTableData(draft => {
-      draft[rowIndex].sex = Number(event.target.value)
-    })
-  }
-
   return (
     <div className="App">
       <ElonTable {...tableProps}>
-        <ElonTableColumn dataKey="name" headerRender={() => (
-          <h3 style={{ margin: '8px' }}>Name</h3>
-        )} />
-        <ElonTableColumn dataKey="sex" width='100px' cellRender={({ data, rowIndex, columnProps }) => (
-          <select value={data[rowIndex][columnProps.dataKey]} style={{ margin: '8px' }}
-            onChange={e => handleSexChange(e, rowIndex)}>
-            <option value="0">female</option>
-            <option value="1">male</option>
-          </select>
-        )} />
-        <ElonTableColumn dataKey="age" width='50px' type='number' />
-        <ElonTableColumn dataKey="email" width="300px" />
       </ElonTable>
     </div>
   )
 }
+
+const NameHeader = () => (
+  <h3 style={{ margin: '8px' }}>Name</h3>
+)
+
+const SexCell = ({ data, rowIndex, columnOption, onUpdate }: CellProps) => (
+  <select value={data[rowIndex][columnOption.dataKey]} style={{ margin: '8px' }}
+    onChange={e => onUpdate(rowIndex, columnOption.dataKey, e.target.value)}>
+    <option value="0">female</option>
+    <option value="1">male</option>
+  </select>
+)
 
 export default App

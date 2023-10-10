@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from 'react'
-import { ColumnProps } from './ElonTableColumn'
+import { ColumnOption } from './ElonTable'
 
 export interface CellProps {
   data: any
   rowIndex: number
-  columnProps: ColumnProps
+  columnOption: ColumnOption
   onUpdate: (rowIndex: number, dataKey: string, newValue: any) => void
 }
 
 const ElonTableCell: React.FC<CellProps> = ({
   data,
   rowIndex,
-  columnProps,
+  columnOption,
   onUpdate
 }) => {
   const [isEditing, setIsEditing] = useState(false)
-  const [inputValue, setInputValue] = useState(data[rowIndex][columnProps.dataKey])
+  const [inputValue, setInputValue] = useState(data[rowIndex][columnOption.dataKey])
 
   useEffect(() => {
-    setInputValue(data[rowIndex][columnProps.dataKey])
-  }, [data, rowIndex, columnProps])
+    setInputValue(data[rowIndex][columnOption.dataKey])
+  }, [data, rowIndex, columnOption])
 
   const handleDoubleClick = () => {
     setIsEditing(true)
@@ -27,7 +27,7 @@ const ElonTableCell: React.FC<CellProps> = ({
 
   const handleBlur = () => {
     setIsEditing(false)
-    onUpdate(rowIndex, columnProps.dataKey, inputValue)
+    onUpdate(rowIndex, columnOption.dataKey, inputValue)
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,10 +36,10 @@ const ElonTableCell: React.FC<CellProps> = ({
 
   return (
     <div className="table-cell">{
-      isEditing || columnProps.type !== 'text' ? (
+      isEditing || columnOption.type !== 'text' ? (
         <input
           value={inputValue}
-          type={columnProps.type}
+          type={columnOption.type}
           onChange={handleChange}
           onBlur={handleBlur}
           autoFocus={isEditing}
