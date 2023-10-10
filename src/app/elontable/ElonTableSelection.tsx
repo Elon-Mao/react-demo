@@ -59,28 +59,28 @@ const ElonTableSelection: React.FC<TableSelectionProps> = ({ selection }) => {
   return (
     <>
       <div className="table-selection" style={{
-        top: top + 'px',
-        left: left + 'px',
-        height: height + 'px',
-        width: width + 'px'
+        top,
+        left,
+        height,
+        width
       }}>
         <div style={{
-          top: colorTop + 'px',
-          left: blankLeft + 'px',
-          height: colorHeight + 'px',
-          width: blankWidth + 'px'
+          top: colorTop,
+          left: blankLeft,
+          height: colorHeight,
+          width: blankWidth
         }}></div>
         <div style={{
-          top: blankTop + 'px',
-          left: colorLeft + 'px',
-          height: blankHeight + 'px',
-          width: colorWidth + 'px'
+          top: blankTop,
+          left: colorLeft,
+          height: blankHeight,
+          width: colorWidth
         }}></div>
         <div style={{
-          top: colorTop + 'px',
-          left: colorLeft + 'px',
-          height: colorHeight + 'px',
-          width: colorWidth + 'px'
+          top: colorTop,
+          left: colorLeft,
+          height: colorHeight,
+          width: colorWidth
         }}></div>
       </div>
     </>

@@ -10,7 +10,7 @@ type AnyArray = Array<any>
 
 export interface ColumnOption {
   dataKey: string
-  width?: string
+  width?: string | number
   type?: string
   headerRender?: React.FC<ColumnOption>
   cellRender?: React.FC<CellProps>
@@ -32,7 +32,7 @@ const useElonTable = <S extends AnyArray>(
   data: S
 ): TableProps<S> => {
   const [columns, setColumns] = useImmer(columnOptions.map(columnOption => Object.assign({}, {
-    width: '200px',
+    width: 200,
     type: 'text',
     headerRender: ElonTableHeader,
     cellRender: ElonTableCell
@@ -49,29 +49,6 @@ const useElonTable = <S extends AnyArray>(
     selection,
     setSelection
   }
-}
-
-const copyTable = (
-  selection: TableSelection | undefined,
-  tableData: AnyArray,
-  columns: ColumnOption[]
-) => {
-  if (!selection) {
-    return
-  }
-  let row0 = selection.mouseDownCell.rowIndex
-  let row1 = selection.mouseMoveCell.rowIndex
-  if (row0 > row1) {
-    [row0, row1] = [row1, row0]
-  }
-  let column0 = selection.mouseDownCell.columnIndex
-  let column1 = selection.mouseMoveCell.columnIndex
-  if (column0 > column1) {
-    [column0, column1] = [column1, column0]
-  }
-  navigator.clipboard.writeText(tableData.slice(row0, row1 + 1)
-    .map(row => columns.slice(column0, column1 + 1)
-      .map(column => row[column.dataKey]).join('\t')).join('\n'))
 }
 
 const ElonTable = <S extends AnyArray>({
@@ -101,33 +78,10 @@ const ElonTable = <S extends AnyArray>({
       if (event.ctrlKey && event.target === document.body) {
         switch (event.key) {
           case 'c':
-            copyTable(selectionRef.current, tableDataRef.current, columns)
+            copyTable()
             break
           case 'v':
-            if (!selectionRef.current) {
-              return
-            }
-            const row0 = selectionRef.current.mouseDownCell.rowIndex
-            const column0 = selectionRef.current.mouseDownCell.columnIndex
-            navigator.clipboard.readText().then((clipText) => {
-              updateTableData(draft => {
-                clipText.split(/[\n\r]+/).forEach((line, lineIndex) => {
-                  if (!line) {
-                    return
-                  }
-                  const rowIndex = row0 + lineIndex
-                  if (draft[rowIndex] === undefined) {
-                    draft[rowIndex] = {}
-                  }
-                  line.split('\t').forEach((text, textIndex) => {
-                    const columnIndex = column0 + textIndex
-                    if (columnIndex < columns.length) {
-                      draft[rowIndex][columns[columnIndex].dataKey] = text
-                    }
-                  })
-                })
-              })
-            })
+            pasteTable()
             break
           case 'z':
             undoTableData()
@@ -139,21 +93,7 @@ const ElonTable = <S extends AnyArray>({
             break
           case 'a':
             event.preventDefault()
-            const tableBody = tableRef.current!.lastElementChild!
-            const maxRow = tableDataRef.current.length - 1
-            const maxColumn = columns.length - 1
-            setSelection({
-              mouseDownCell: {
-                rowIndex: 0,
-                columnIndex: 0,
-                target: tableBody.children[0].children[0] as HTMLDivElement
-              },
-              mouseMoveCell: {
-                rowIndex: maxRow,
-                columnIndex: maxColumn,
-                target: tableBody.children[maxRow].children[maxColumn] as HTMLDivElement
-              }
-            })
+            selectAll()
             break
         }
       }
@@ -167,6 +107,70 @@ const ElonTable = <S extends AnyArray>({
       removeEventListener('keydown', handleKeyDown)
     }
   }, [])
+
+  const copyTable = () => {
+    if (!selectionRef.current) {
+      return
+    }
+    let row0 = selectionRef.current.mouseDownCell.rowIndex
+    let row1 = selectionRef.current.mouseMoveCell.rowIndex
+    if (row0 > row1) {
+      [row0, row1] = [row1, row0]
+    }
+    let column0 = selectionRef.current.mouseDownCell.columnIndex
+    let column1 = selectionRef.current.mouseMoveCell.columnIndex
+    if (column0 > column1) {
+      [column0, column1] = [column1, column0]
+    }
+    navigator.clipboard.writeText(tableDataRef.current.slice(row0, row1 + 1)
+      .map(row => columns.slice(column0, column1 + 1)
+        .map(column => row[column.dataKey]).join('\t')).join('\n'))
+  }
+
+  const pasteTable = () => {
+    if (!selectionRef.current) {
+      return
+    }
+    const row0 = selectionRef.current.mouseDownCell.rowIndex
+    const column0 = selectionRef.current.mouseDownCell.columnIndex
+    navigator.clipboard.readText().then((clipText) => {
+      updateTableData(draft => {
+        clipText.split(/[\n\r]+/).forEach((line, lineIndex) => {
+          if (!line) {
+            return
+          }
+          const rowIndex = row0 + lineIndex
+          if (draft[rowIndex] === undefined) {
+            draft[rowIndex] = {}
+          }
+          line.split('\t').forEach((text, textIndex) => {
+            const columnIndex = column0 + textIndex
+            if (columnIndex < columns.length) {
+              draft[rowIndex][columns[columnIndex].dataKey] = text
+            }
+          })
+        })
+      })
+    })
+  }
+
+  const selectAll = () => {
+    const tableBody = tableRef.current!.lastElementChild!
+    const maxRow = tableDataRef.current.length - 1
+    const maxColumn = columns.length - 1
+    setSelection({
+      mouseDownCell: {
+        rowIndex: 0,
+        columnIndex: 0,
+        target: tableBody.children[0].children[0] as HTMLDivElement
+      },
+      mouseMoveCell: {
+        rowIndex: maxRow,
+        columnIndex: maxColumn,
+        target: tableBody.children[maxRow].children[maxColumn] as HTMLDivElement
+      }
+    })
+  }
 
   const onUpdate = (rowIndex: number, dataKey: string, newValue: any) => {
     updateTableData(draft => {
