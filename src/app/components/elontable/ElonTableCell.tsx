@@ -1,46 +1,39 @@
 import React, { useEffect, useState } from 'react'
-import { ColumnOption } from './ElonTable'
+import { AnyArray, Column } from './ElonTable'
+import { UpdateFunction } from './use-undo-redo'
 
 export interface CellProps {
-  data: any
+  tableData: any
   rowIndex: number
-  columnOption: ColumnOption
-  onUpdate: (rowIndex: number, dataKey: string, newValue: any) => void
+  column: Column
+  updateTableData: UpdateFunction<AnyArray>
 }
 
 const ElonTableCell: React.FC<CellProps> = ({
-  data,
+  tableData,
   rowIndex,
-  columnOption,
-  onUpdate
+  column,
+  updateTableData
 }) => {
   const [isEditing, setIsEditing] = useState(false)
-  const [inputValue, setInputValue] = useState(data[rowIndex][columnOption.dataKey])
+  const [inputValue, setInputValue] = useState(tableData[rowIndex][column.dataKey])
 
-  useEffect(() => {
-    setInputValue(data[rowIndex][columnOption.dataKey])
-  }, [data, rowIndex, columnOption])
-
-  const handleDoubleClick = () => {
-    setIsEditing(true)
-  }
+  useEffect(() => setInputValue(tableData[rowIndex][column.dataKey]), [tableData, rowIndex, column])
 
   const handleBlur = () => {
     setIsEditing(false)
-    onUpdate(rowIndex, columnOption.dataKey, inputValue)
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value)
+    updateTableData(draft => {
+      draft[rowIndex][column.dataKey] = inputValue
+    })
   }
 
   return (
-    <div className="table-cell" onDoubleClick={handleDoubleClick}>{
-      isEditing || columnOption.type !== 'text' ? (
+    <div className="table-cell" onDoubleClick={() => setIsEditing(true)}>{
+      isEditing || column.type !== 'text' ? (
         <input
           value={inputValue}
-          type={columnOption.type}
-          onChange={handleChange}
+          type={column.type}
+          onChange={e => setInputValue(e.target.value)}
           onBlur={handleBlur}
           autoFocus={isEditing}
           className="table-input" />) : (

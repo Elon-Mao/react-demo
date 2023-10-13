@@ -1,7 +1,7 @@
 import React from 'react'
-import { ColumnOption } from './ElonTable'
+import { Column } from './ElonTable'
 
-const ElonTableHeader: React.FC<ColumnOption> = ({
+const ElonTableHeader: React.FC<Column> = ({
   dataKey
 }) => (
   <div className="table-header" title={dataKey}>
