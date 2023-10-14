@@ -78,11 +78,6 @@
   font-family: var(--font-family);
 }
 
-.copy-input {
-  position: absolute;
-  left: -9999px;
-}
-
 .table-cell > div,
 .table-header {
   white-space: nowrap;

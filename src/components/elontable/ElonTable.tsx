@@ -1,4 +1,5 @@
-import { forwardRef, useState, useEffect, useRef, Dispatch, SetStateAction, useCallback, useImperativeHandle, useMemo, createElement, createRef, RefObject } from 'react'
+import { forwardRef, useState, useEffect, useRef, Dispatch, SetStateAction, useCallback, useImperativeHandle, useMemo, createElement, RefObject } from 'react'
+import { Patch } from 'immer'
 import { useImmer } from 'use-immer'
 import { UpdateFunction, useUndoRedo } from './use-undo-redo'
 import ElonTableCell, { CellProps } from './ElonTableCell'
@@ -19,6 +20,7 @@ export interface Column {
 export interface TableProps {
   columns: Column[]
   tableData: AnyArray
+  onChange?: (patches: Patch[]) => void
 }
 
 export interface ElonTableRef {
@@ -43,7 +45,7 @@ const ElonTable = forwardRef<ElonTableRef, TableProps>((props, ref) => {
     cellRender: ElonTableCell
   }, column)), [])
   const [columns, updateColumns] = useImmer(columnsInitial)
-  const [tableData, updateTableData, undoTableData, redoTableData] = useUndoRedo(props.tableData)
+  const [tableData, updateTableData, undoTableData, redoTableData] = useUndoRedo(props.tableData, props.onChange)
   const [selection, setSelection] = useState<TableSelection>()
   const tableRef = useRef<HTMLDivElement>(null)
   const selecting = useRef(false)
@@ -119,7 +121,7 @@ const ElonTable = forwardRef<ElonTableRef, TableProps>((props, ref) => {
     }
     const row0 = selection.mouseDownCell.rowIndex
     const column0 = selection.mouseDownCell.columnIndex
-    navigator.clipboard.readText().then((clipText) => {
+    navigator.clipboard.readText().then(clipText => {
       updateTableData(draft => {
         clipText.split(/[\n\r]+/).forEach((line, lineIndex) => {
           if (!line) {
