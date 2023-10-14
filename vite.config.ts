@@ -5,7 +5,7 @@ import generateMenu from './src/components/menu'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/vue-demo',
+  base: '/react-demo',
   define: {
     MENU_ITEMS: generateMenu()
   },
