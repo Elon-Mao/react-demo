@@ -1,21 +1,25 @@
-import React from 'react'
-import { Sandpack } from '@codesandbox/sandpack-react'
+import React, { useLayoutEffect, useState } from 'react'
+import { Sandpack, SandpackProps } from '@codesandbox/sandpack-react'
 import MenuItem from './types/MenuItem'
 // import TableApp from './components/elontable/App'
 declare const MENU_ITEMS: MenuItem[]
-
 const App: React.FC = () => {
+
+  const [sandpackProps, setSandpackProps] = useState<SandpackProps>(MENU_ITEMS[0])
+
+  useLayoutEffect(() => {
+    const iframe = document.getElementsByTagName('IFRAME')[0] as HTMLIFrameElement
+    iframe.onload = (() => {
+      if (!iframe.allow.includes("clipboard-read")) {
+        iframe.setAttribute("allow", iframe.allow + " clipboard-read;")
+        iframe.src = iframe.src
+      }
+    })
+  })
+
   return (
     <>
-      {/* <TableApp></TableApp> */}
-      <Sandpack template="react-ts" options={{
-        editorHeight: 500
-      }} files={MENU_ITEMS[0].files} customSetup={{
-        dependencies: {
-          "use-immer": "^0.9.0",
-          "immer": "10.0.3"
-        }
-      }} />
+      <Sandpack {...sandpackProps} />
     </>
   )
 }

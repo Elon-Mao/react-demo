@@ -3,6 +3,13 @@ import path from 'path'
 import { SandpackFile } from '@codesandbox/sandpack-react'
 import MenuItem from '../types/MenuItem'
 
+const defaultOptions = {
+  template: "react-ts",
+  options: {
+    editorHeight: 500
+  }
+}
+
 export default function generateMenu() {
   const menuItems: MenuItem[] = []
   fs.readdirSync(__dirname).forEach((component: string) => {
@@ -15,7 +22,7 @@ export default function generateMenu() {
       const filePath = path.join(componentPath, file)
       const fileData = fs.readFileSync(filePath, 'utf8').replaceAll('\r', '')
       if (file === 'info.json') {
-        const jsonData = JSON.parse(fileData)
+        const jsonData = Object.assign({}, defaultOptions, JSON.parse(fileData))
         jsonData.files = menuItemFiles
         menuItems.push(jsonData)
       } else {
