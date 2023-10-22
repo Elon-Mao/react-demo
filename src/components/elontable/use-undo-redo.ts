@@ -16,25 +16,25 @@ const useUndoRedo = <S extends Objectish>(
   const _maxStep = useRef(maxStep)
   const _changes = useRef<Patch[][]>([])
   const _inverseChanges = useRef<Patch[][]>([])
+  const stateRef = useRef(initialValue)
+  stateRef.current = state
 
   const updater: UpdateFunction<S> = useCallback(draft => {
-    setState(current => {
-      const [nextState, patches, inversePatches] = produceWithPatches<S>(current, draft)
-      if (patches.length === 0) {
-        return nextState
-      }
-      _changes.current.splice(_currentStep.current)
-      _changes.current.push(patches)
-      _inverseChanges.current.splice(_currentStep.current++)
-      _inverseChanges.current.push(inversePatches)
-      if (_currentStep.current > _maxStep.current) {
-        _changes.current.shift()
-        _inverseChanges.current.shift()
-        _currentStep.current--
-      }
-      onChange(patches)
-      return nextState
-    })
+    const [nextState, patches, inversePatches] = produceWithPatches<S>(stateRef.current, draft)
+    if (patches.length === 0) {
+      return
+    }
+    _changes.current.splice(_currentStep.current)
+    _changes.current.push(patches)
+    _inverseChanges.current.splice(_currentStep.current++)
+    _inverseChanges.current.push(inversePatches)
+    if (_currentStep.current > _maxStep.current) {
+      _changes.current.shift()
+      _inverseChanges.current.shift()
+      _currentStep.current--
+    }
+    onChange(patches)
+    setState(nextState)
   }, [])
 
   const undo = useCallback(() => {
@@ -43,16 +43,16 @@ const useUndoRedo = <S extends Objectish>(
     }
     const patches = _inverseChanges.current[--_currentStep.current]
     onChange(patches)
-    setState(current => applyPatches(current, patches))
+    setState(applyPatches(stateRef.current, patches))
   }, [])
 
   const redo = useCallback(() => {
     if (_currentStep.current >= _changes.current.length) {
       return
     }
-    const patches =_changes.current[_currentStep.current++]
+    const patches = _changes.current[_currentStep.current++]
     onChange(patches)
-    setState(current => applyPatches(current, patches))
+    setState(applyPatches(stateRef.current, patches))
   }, [])
 
   return [state, updater, undo, redo]

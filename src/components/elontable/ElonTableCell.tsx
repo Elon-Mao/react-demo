@@ -1,28 +1,27 @@
-import React, { useEffect, useState } from 'react'
-import { AnyArray, Column } from './ElonTable'
-import { UpdateFunction } from './use-undo-redo'
+import React, { RefObject, memo, useEffect, useState } from 'react'
+import { Column, ElonTableRef } from './ElonTable'
 
 export interface CellProps {
-  tableData: any
+  value: any
   rowIndex: number
   column: Column
-  updateTableData: UpdateFunction<AnyArray>
+  elonTableRef: RefObject<ElonTableRef>
 }
 
-const ElonTableCell: React.FC<CellProps> = ({
-  tableData,
+const ElonTableCell: React.FC<CellProps> = memo(({
+  value,
   rowIndex,
   column,
-  updateTableData
+  elonTableRef
 }) => {
   const [isEditing, setIsEditing] = useState(false)
-  const [inputValue, setInputValue] = useState(tableData[rowIndex][column.dataKey])
+  const [inputValue, setInputValue] = useState(value)
 
-  useEffect(() => setInputValue(tableData[rowIndex][column.dataKey]), [tableData, rowIndex, column])
+  useEffect(() => setInputValue(value), [value])
 
   const handleBlur = () => {
     setIsEditing(false)
-    updateTableData(draft => {
+    elonTableRef.current!.updateTableData(draft => {
       draft[rowIndex][column.dataKey] = inputValue
     })
   }
@@ -43,6 +42,6 @@ const ElonTableCell: React.FC<CellProps> = ({
       )
     }</div>
   )
-}
+})
 
 export default ElonTableCell

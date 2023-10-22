@@ -1,4 +1,4 @@
-import { forwardRef, useState, useEffect, useRef, Dispatch, SetStateAction, useCallback, useImperativeHandle, useMemo, createElement, RefObject } from 'react'
+import { forwardRef, useState, useEffect, useRef, Dispatch, SetStateAction, useCallback, useImperativeHandle, useMemo, createElement, RefObject, memo } from 'react'
 import { Patch } from 'immer'
 import { useImmer } from 'use-immer'
 import { UpdateFunction, useUndoRedo } from './use-undo-redo'
@@ -37,7 +37,7 @@ export interface ElonTableRef {
   selectAll: () => void
 }
 
-const ElonTable = forwardRef<ElonTableRef, TableProps>((props, ref) => {
+const ElonTable = memo(forwardRef<ElonTableRef, TableProps>((props, ref) => {
   const columnsInitial: Column[] = useMemo(() => props.columns.map(column => Object.assign({}, {
     width: 200,
     type: 'text',
@@ -223,10 +223,10 @@ const ElonTable = forwardRef<ElonTableRef, TableProps>((props, ref) => {
                 onMouseDown={e => handleMouseDown(e, rowIndex, columnIndex)}
                 onMouseMove={e => handleMouseMove(e, rowIndex, columnIndex)}>
                 {createElement(column.cellRender!, {
-                  tableData,
+                  value: tableData[rowIndex][column.dataKey],
                   rowIndex,
                   column,
-                  updateTableData
+                  elonTableRef
                 })}
               </div>
             ))}
@@ -235,6 +235,6 @@ const ElonTable = forwardRef<ElonTableRef, TableProps>((props, ref) => {
       </div>
     </div>
   )
-})
+}))
 
 export default ElonTable

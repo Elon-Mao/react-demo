@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { memo, useCallback, useRef } from 'react'
 import { Patch } from 'immer'
 import ElonTable, { ElonTableRef } from './ElonTable'
 import { CellProps } from './ElonTableCell'
@@ -42,9 +42,9 @@ const App: React.FC = () => {
     })
   }
 
-  const handleChange = (patches: Patch[]) => {
+  const handleChange = useCallback((patches: Patch[]) => {
     console.log(patches)
-  }
+  }, [])
 
   return (
     <>
@@ -61,18 +61,18 @@ const App: React.FC = () => {
   )
 }
 
-const NameHeader = () => (
+const NameHeader = memo(() => (
   <h3 style={{ margin: 8 }}>Name</h3>
-)
+))
 
-const SexCell = ({ tableData, rowIndex, column, updateTableData }: CellProps) => (
-  <select value={tableData[rowIndex][column.dataKey]} style={{ margin: 8 }}
-    onChange={e => updateTableData(draft => {
+const SexCell = memo(({ value, rowIndex, column, elonTableRef }: CellProps) => (
+  <select value={value} style={{ margin: 8 }}
+    onChange={e => elonTableRef.current!.updateTableData(draft => {
       draft[rowIndex][column.dataKey] = e.target.value
     })}>
     <option value="0">female</option>
     <option value="1">male</option>
   </select>
-)
+))
 
 export default App
