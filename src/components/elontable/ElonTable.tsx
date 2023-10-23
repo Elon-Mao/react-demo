@@ -102,12 +102,12 @@ const ElonTable = memo(forwardRef<ElonTableRef, TableProps>((props, ref) => {
       return
     }
     let row0 = selection.mouseDownCell.rowIndex
-    let row1 = selection.mouseMoveCell.rowIndex
+    let row1 = selection.mouseEnterCell.rowIndex
     if (row0 > row1) {
       [row0, row1] = [row1, row0]
     }
     let column0 = selection.mouseDownCell.columnIndex
-    let column1 = selection.mouseMoveCell.columnIndex
+    let column1 = selection.mouseEnterCell.columnIndex
     if (column0 > column1) {
       [column0, column1] = [column1, column0]
     }
@@ -151,7 +151,7 @@ const ElonTable = memo(forwardRef<ElonTableRef, TableProps>((props, ref) => {
         columnIndex: 0,
         target: tableBody.children[0].children[0] as HTMLDivElement
       },
-      mouseMoveCell: {
+      mouseEnterCell: {
         rowIndex: maxRow,
         columnIndex: maxColumn,
         target: tableBody.children[maxRow].children[maxColumn] as HTMLDivElement
@@ -172,16 +172,16 @@ const ElonTable = memo(forwardRef<ElonTableRef, TableProps>((props, ref) => {
     }
     setSelection({
       mouseDownCell: cell,
-      mouseMoveCell: cell
+      mouseEnterCell: cell
     })
   }
-  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>, rowIndex: number, columnIndex: number) => {
+  const handleMouseEnter = (event: React.MouseEvent<HTMLDivElement>, rowIndex: number, columnIndex: number) => {
     if (!selecting.current) {
       return
     }
     setSelection({
       mouseDownCell: selection!.mouseDownCell,
-      mouseMoveCell: {
+      mouseEnterCell: {
         rowIndex,
         columnIndex,
         target: event.currentTarget
@@ -221,7 +221,7 @@ const ElonTable = memo(forwardRef<ElonTableRef, TableProps>((props, ref) => {
             {columns.map((column, columnIndex) => (
               <div className="table-cell-wrapper" style={{ width: column.width }} key={columnIndex}
                 onMouseDown={e => handleMouseDown(e, rowIndex, columnIndex)}
-                onMouseMove={e => handleMouseMove(e, rowIndex, columnIndex)}>
+                onMouseEnter={e => handleMouseEnter(e, rowIndex, columnIndex)}>
                 {createElement(column.cellRender!, {
                   value: tableData[rowIndex][column.dataKey],
                   rowIndex,

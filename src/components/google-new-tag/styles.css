@@ -1,0 +1,90 @@
+:root {
+  --column-count: 4;
+  --row-count: 2;
+  --tile-size: 112px;
+  --title-height: 32px;
+  --tile-background-color: rgba(241, 243, 244, 1.00);
+  --tile-hover-color: rgba(32, 33, 36, .1);
+  --icon-size: 48px;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  font-size: 81.25%;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  height: calc(var(--row-count) * var(--tile-size));
+  justify-content: center;
+  margin-bottom: 8px;
+  opacity: 0;
+  overflow: hidden;
+  padding: 2px;
+  transition: opacity .3s ease-in-out;
+  width: calc(var(--column-count) * var(--tile-size) + 13px);
+}
+
+.tile {
+  align-items: center;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: var(--tile-size);
+  outline: 0;
+  position: relative;
+  transition-duration: .3s;
+  transition-property: left, top;
+  transition-timing-function: ease-in-out;
+  user-select: none;
+  width: var(--tile-size);
+}
+
+.tile a {
+  border-radius: 4px;
+  display: inline-block;
+  height: 100%;
+  outline: 0;
+  position: absolute;
+  touch-action: none;
+  width: 100%;
+}
+
+.tile-icon {
+  align-items: center;
+  background-color: var(--tile-background-color);
+  border-radius: 50%;
+  display: flex;
+  flex-shrink: 0;
+  height: var(--icon-size);
+  justify-content: center;
+  margin-top: 16px;
+  width: var(--icon-size);
+}
+
+.tile-icon img {
+  height: 24px;
+  width: 24px;
+}
+
+.tile-title {
+  align-items: center;
+  border-radius: calc(var(--title-height)/ 2 + 2px);
+  display: flex;
+  height: var(--title-height);
+  line-height: calc(var(--title-height)/ 2);
+  margin-top: 6px;
+  padding: 2px 8px;
+  width: 88px;
+}
+
+.tile-title span {
+  font-weight: 400;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}

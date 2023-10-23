@@ -8,7 +8,7 @@ interface CellWrapper {
 
 export interface TableSelection {
   mouseDownCell: CellWrapper
-  mouseMoveCell: CellWrapper
+  mouseEnterCell: CellWrapper
 }
 
 interface TableSelectionProps {
@@ -22,13 +22,13 @@ const ElonTableSelection: React.FC<TableSelectionProps> = ({ selection }) => {
     )
   }
   const mouseDownCellRef = selection.mouseDownCell.target
-  const mouseMoveCellRef = selection.mouseMoveCell.target
+  const mouseEnterCellRef = selection.mouseEnterCell.target
   let top, height, colorTop, colorHeight, blankTop, blankHeight
   let left, width, colorLeft, colorWidth, blankLeft, blankWidth
-  if (selection.mouseDownCell.rowIndex > selection.mouseMoveCell.rowIndex) {
-    blankTop = mouseDownCellRef.offsetTop - mouseMoveCellRef.offsetTop
+  if (selection.mouseDownCell.rowIndex > selection.mouseEnterCell.rowIndex) {
+    blankTop = mouseDownCellRef.offsetTop - mouseEnterCellRef.offsetTop
     blankHeight = mouseDownCellRef.clientHeight
-    top = mouseMoveCellRef.offsetTop
+    top = mouseEnterCellRef.offsetTop
     height = blankTop + blankHeight
     colorTop = 0
     colorHeight = blankTop
@@ -36,14 +36,14 @@ const ElonTableSelection: React.FC<TableSelectionProps> = ({ selection }) => {
     blankTop = 0
     blankHeight = mouseDownCellRef.clientHeight
     top = mouseDownCellRef.offsetTop
-    height = mouseMoveCellRef.offsetTop - mouseDownCellRef.offsetTop + mouseMoveCellRef.clientHeight
+    height = mouseEnterCellRef.offsetTop - mouseDownCellRef.offsetTop + mouseEnterCellRef.clientHeight
     colorTop = blankHeight
     colorHeight = height - blankHeight
   }
-  if (selection.mouseDownCell.columnIndex > selection.mouseMoveCell.columnIndex) {
-    blankLeft = mouseDownCellRef.offsetLeft - mouseMoveCellRef.offsetLeft
+  if (selection.mouseDownCell.columnIndex > selection.mouseEnterCell.columnIndex) {
+    blankLeft = mouseDownCellRef.offsetLeft - mouseEnterCellRef.offsetLeft
     blankWidth = mouseDownCellRef.clientWidth
-    left = mouseMoveCellRef.offsetLeft
+    left = mouseEnterCellRef.offsetLeft
     width = blankLeft + blankWidth
     colorLeft = 0
     colorWidth = blankLeft
@@ -51,7 +51,7 @@ const ElonTableSelection: React.FC<TableSelectionProps> = ({ selection }) => {
     blankLeft = 0
     blankWidth = mouseDownCellRef.clientWidth
     left = mouseDownCellRef.offsetLeft
-    width = mouseMoveCellRef.offsetLeft - mouseDownCellRef.offsetLeft + mouseMoveCellRef.clientWidth
+    width = mouseEnterCellRef.offsetLeft - mouseDownCellRef.offsetLeft + mouseEnterCellRef.clientWidth
     colorLeft = blankWidth
     colorWidth = width - blankWidth
   }
