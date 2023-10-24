@@ -1,102 +1,98 @@
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
-import { useImmer } from 'use-immer'
+import React, { Dispatch, SetStateAction, memo, useCallback, useEffect, useRef, useState } from 'react'
+import { Updater, useImmer } from 'use-immer'
 
-export interface TileProps extends React.HTMLProps<HTMLAnchorElement> {
-  key: React.Key
+export interface TileProps extends React.HTMLProps<HTMLDivElement> {
+  tileId: React.Key
+  positionIndex?: number
 }
 
-const Tile: React.FC<TileProps> = memo(({
+export interface TilePropsEx extends TileProps {
+  updateTiles: Updater<TileProps[]>
+  draggingId: React.Key | undefined
+  dragStart: (tileId: React.Key) => void
+  dragTile: (tileId: React.Key) => void
+  dragEnd: (tileId: React.Key) => void
+}
+
+const Tile: React.FC<TilePropsEx> = ({
   'aria-label': ariaLabel,
-  href
+  href,
+  style,
+  tileId,
+  updateTiles,
+  draggingId,
+  dragStart,
+  dragTile,
+  dragEnd
 }) => {
-  const [dragging, setDragging] = useState(false)
-  const [style, updateStyle] = useImmer<React.CSSProperties>({})
   const tileRef = useRef<HTMLDivElement>(null)
-  const isMoved = useRef(false)
-  const originalTop = useRef(0)
-  const originalLeft = useRef(0)
-  const originalX = useRef(0)
-  const originalY = useRef(0)
 
   const HandleMouseEnter = () => {
-    updateStyle(draft => {
-      draft.backgroundColor = 'var(--tile-hover-color)'
+    updateTiles(draft => {
+      if (draggingId === undefined) {
+        draft.find(tile => tile.tileId === tileId)!.style = {
+          backgroundColor: 'var(--tile-hover-color)'
+        }
+      } else {
+        dragTile(tileId)
+      }
     })
   }
 
   const handleMouseLeave = () => {
-    updateStyle(draft => {
-      if (draft.transitionProperty !== 'none') {
-        draft.backgroundColor = undefined
-      }
-    })
+    if (draggingId === undefined) {
+      updateTiles(draft => {
+        delete draft.find(tile => tile.tileId === tileId)!.style
+      })
+    }
   }
-
-  const handleMouseUp = useCallback(() => {
-    removeEventListener('mouseup', handleMouseUp)
-    removeEventListener('mousemove', handleMouseMove)
-    if (!isMoved.current) {
-      window.open(href)
-    }
-    setDragging(false)
-  }, [])
-
-  const handleMouseMove = useCallback((event: MouseEvent) => {
-    const difX = event.clientX - originalX.current
-    const difY = event.clientY - originalY.current
-    if (!isMoved.current) {
-      if (difX > 2 || difY > 2) {
-        isMoved.current = true
-      }
-    }
-    updateStyle(draft => {
-      draft.top = originalTop.current + difY
-      draft.left = originalLeft.current + difX
-    })
-  }, [])
 
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
-    setDragging(true)
-    isMoved.current = false
-    originalTop.current = event.currentTarget.offsetTop
-    originalLeft.current = event.currentTarget.offsetLeft
-    originalX.current = event.clientX
-    originalY.current = event.clientY
+    const mousedownLeft = event.currentTarget.offsetLeft
+    const mousedownTop = event.currentTarget.offsetTop
+    const mousedownX = event.clientX
+    const mousedownY = event.clientY
+    let isMoved = false
+
+    const handleMouseUp = () => {
+      removeEventListener('mouseup', handleMouseUp)
+      removeEventListener('mousemove', handleMouseMove)
+      if (!isMoved) {
+        window.open(href)
+      }
+      dragEnd(tileId)
+    }
+
+    const handleMouseMove = (event: MouseEvent) => {
+      const difX = event.clientX - mousedownX
+      const difY = event.clientY - mousedownY
+      if (!isMoved) {
+        if (Math.abs(difX) > 2 || Math.abs(difY) > 2) {
+          isMoved = true
+        }
+      }
+      tileRef.current!.style.left = mousedownLeft + difX + 'px'
+      tileRef.current!.style.top = mousedownTop + difY + 'px'
+    }
+
     addEventListener('mouseup', handleMouseUp)
     addEventListener('mousemove', handleMouseMove)
-    updateStyle(draft => {
-      draft.transitionProperty = 'none'
-      draft.position = 'absolute'
-      draft.top = originalTop.current
-      draft.left = originalLeft.current
-    })
+    dragStart(tileId)
   }
 
-  const handleClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    event.preventDefault()
-  }, [])
-
-  console.log(style)
-
   return (
-    <>
-      <div ref={tileRef} className="tile" title={ariaLabel} style={style}
-        onMouseEnter={HandleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onMouseDown={handleMouseDown}
-        onClick={handleClick}>
-        <div className="tile-icon">
-          <img draggable="false" src={`https://www.google.com/s2/favicons?domain=${href}&sz=128`} />
-        </div>
-        <div className="tile-title">
-          <span>{ariaLabel}</span>
-        </div>
+    <div key={tileId} ref={tileRef} className="tile" title={ariaLabel} style={style}
+      onMouseEnter={HandleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseDown={handleMouseDown}>
+      <div className="tile-icon">
+        <img draggable="false" src={`https://www.google.com/s2/favicons?domain=${href}&sz=24`} />
       </div>
-      {
-        dragging ? <div className="tile" /> : <></>
-      }
-    </>
+      <div className="tile-title">
+        <span>{ariaLabel}</span>
+      </div>
+    </div>
   )
-})
+}
 
 export default Tile

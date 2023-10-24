@@ -42,16 +42,6 @@ body {
   width: var(--tile-size);
 }
 
-.tile a {
-  border-radius: 4px;
-  display: inline-block;
-  height: 100%;
-  outline: 0;
-  position: absolute;
-  touch-action: none;
-  width: 100%;
-}
-
 .tile-icon {
   align-items: center;
   background-color: var(--tile-background-color);
