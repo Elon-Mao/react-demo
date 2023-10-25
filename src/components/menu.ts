@@ -6,7 +6,7 @@ import MenuItem from '../types/MenuItem'
 const defaultOptions = {
   template: "react-ts",
   options: {
-    editorHeight: 500
+    editorHeight: 'auto'
   }
 }
 
