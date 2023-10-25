@@ -1,8 +1,10 @@
-import React, { Dispatch, SetStateAction, memo, useCallback, useEffect, useRef, useState } from 'react'
-import { Updater, useImmer } from 'use-immer'
+import React, { useEffect, useRef } from 'react'
+import { Updater } from 'use-immer'
 
 export interface TileProps extends React.HTMLProps<HTMLDivElement> {
   tileId: React.Key
+  left?: number
+  top?: number
   positionIndex?: number
 }
 
@@ -15,10 +17,11 @@ export interface TilePropsEx extends TileProps {
 }
 
 const Tile: React.FC<TilePropsEx> = ({
-  'aria-label': ariaLabel,
+  title,
   href,
   style,
   tileId,
+  positionIndex,
   updateTiles,
   draggingId,
   dragStart,
@@ -26,8 +29,18 @@ const Tile: React.FC<TilePropsEx> = ({
   dragEnd
 }) => {
   const tileRef = useRef<HTMLDivElement>(null)
+  const transitionRef = useRef(false)
+  useEffect(() => {
+    transitionRef.current = true
+    setTimeout(() => {
+      transitionRef.current = false
+    }, 300)
+  }, [positionIndex])
 
   const HandleMouseEnter = () => {
+    if (transitionRef.current) {
+      return
+    }
     updateTiles(draft => {
       if (draggingId === undefined) {
         draft.find(tile => tile.tileId === tileId)!.style = {
@@ -81,7 +94,7 @@ const Tile: React.FC<TilePropsEx> = ({
   }
 
   return (
-    <div key={tileId} ref={tileRef} className="tile" title={ariaLabel} style={style}
+    <div key={tileId} ref={tileRef} className="tile" title={title} style={style}
       onMouseEnter={HandleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseDown={handleMouseDown}>
@@ -89,7 +102,7 @@ const Tile: React.FC<TilePropsEx> = ({
         <img draggable="false" src={`https://www.google.com/s2/favicons?domain=${href}&sz=24`} />
       </div>
       <div className="tile-title">
-        <span>{ariaLabel}</span>
+        <span>{title}</span>
       </div>
     </div>
   )

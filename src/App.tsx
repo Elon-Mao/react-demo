@@ -1,12 +1,11 @@
 import React, { useLayoutEffect, useState } from 'react'
-import { Sandpack, SandpackProps } from '@codesandbox/sandpack-react'
+import { Sandpack } from '@codesandbox/sandpack-react'
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
 import MenuItem from './types/MenuItem'
-// import TableApp from './components/elontable/App'
 declare const MENU_ITEMS: MenuItem[]
 const App: React.FC = () => {
-
-  const [sandpackProps, setSandpackProps] = useState<SandpackProps>(MENU_ITEMS[0])
-
+  const [currentId, setCurrentId] = useState(MENU_ITEMS[0].id)
   useLayoutEffect(() => {
     const iframe = document.getElementsByTagName('IFRAME')[0] as HTMLIFrameElement
     iframe.onload = (() => {
@@ -17,10 +16,24 @@ const App: React.FC = () => {
     })
   })
 
+  const sandpackProps = MENU_ITEMS.find(menuItem => menuItem.id === currentId)
   return (
-    <>
-      <Sandpack {...sandpackProps} />
-    </>
+    <div style={{ display: 'flex' }}>
+      <Tabs
+        orientation="vertical"
+        variant="scrollable"
+        value={currentId}
+        onChange={(_e, newValue) => setCurrentId(newValue)}>
+        {MENU_ITEMS.map(menuItem => {
+          return (
+            <Tab key={menuItem.id} label={menuItem.menuName} value={menuItem.id} sx={{ textTransform: 'none' }} />
+          )
+        })}
+      </Tabs>
+      <div style={{ flexGrow: 1 }}>
+        <Sandpack {...sandpackProps} />
+      </div>
+    </div>
   )
 }
 

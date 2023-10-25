@@ -36,7 +36,7 @@ const App: React.FC = () => {
   const deleteRow = () => {
     tableRef.current!.updateTableData(draft => {
       const selectRowIndex = tableRef.current!.selection?.mouseDownCell.rowIndex
-      if (selectRowIndex) {
+      if (selectRowIndex !== undefined) {
         draft.splice(selectRowIndex, 1)
       }
     })

@@ -9,5 +9,17 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script src="https://unpkg.com/live2d-widget@3.1.4/lib/L2Dwidget.min.js"></script>
+    <script>
+      L2Dwidget.init({
+        model: {
+          jsonPath: "https://unpkg.com/live2d-widget-model-z16@1.0.5/assets/z16.model.json"
+        },
+        display: {
+          position: 'left',
+          vOffset: -30
+        }
+      })
+    </script>
   </body>
 </html>
