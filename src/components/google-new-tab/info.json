@@ -1,6 +1,6 @@
 {
   "id": 2,
-  "menuName": "Google New Tag",
+  "menuName": "drag & transition",
   "customSetup": {
     "dependencies": {
       "use-immer": "^0.9.0",

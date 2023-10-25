@@ -109,12 +109,15 @@ const App: React.FC = () => {
   }
 
   return (
-    <div ref={containerRef} className='container'>
-      {tiles.map(tile => (
-        <Tile key={tile.tileId} {...tile} updateTiles={updateTiles} draggingId={draggingId}
-          dragStart={handleDragStart} dragEnd={handleDragEnd} dragTile={dragTile} />
-      ))}
-    </div>
+    <>
+      <h2>Hold to drag</h2>
+      <div ref={containerRef} className='container'>
+        {tiles.map(tile => (
+          <Tile key={tile.tileId} {...tile} updateTiles={updateTiles} draggingId={draggingId}
+            dragStart={handleDragStart} dragEnd={handleDragEnd} dragTile={dragTile} />
+        ))}
+      </div>
+    </>
   )
 }
 
