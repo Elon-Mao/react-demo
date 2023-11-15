@@ -1,3 +1,7 @@
+## Live Demo
+
+https://elon-mao.github.io/react-demo/
+
 ## ElonTable
 
 A lightweight table component that supports copy-paste functionality and includes undo and redo capabilities.
