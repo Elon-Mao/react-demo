@@ -86,7 +86,7 @@ const ElonTable = memo(forwardRef<ElonTableRef, TableProps>((props, ref) => {
         }
       }
     }
-    addEventListener('mousedown', handleMouseDown)
+    addEventListener('mousedown', handleMouseDown, true)
     addEventListener('mouseup', handleMouseUp)
     addEventListener('keydown', handleKeyDown)
     return () => {
@@ -123,7 +123,7 @@ const ElonTable = memo(forwardRef<ElonTableRef, TableProps>((props, ref) => {
     const column0 = selection.mouseDownCell.columnIndex
     navigator.clipboard.readText().then(clipText => {
       updateTableData(draft => {
-        clipText.split(/[\n\r]+/).forEach((line, lineIndex) => {
+        clipText.split(/[\n\r?]+/).forEach((line, lineIndex) => {
           if (!line) {
             return
           }
@@ -159,11 +159,6 @@ const ElonTable = memo(forwardRef<ElonTableRef, TableProps>((props, ref) => {
     })
   }
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>, rowIndex: number, columnIndex: number) => {
-    const target = event.target as HTMLElement
-    if (target.tagName !== 'DIV') {
-      return
-    }
-    event.stopPropagation()
     selecting.current = true
     const cell = {
       rowIndex,
