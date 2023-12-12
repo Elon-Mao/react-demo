@@ -44,7 +44,8 @@ const Tile: React.FC<TilePropsEx> = ({
     updateTiles(draft => {
       if (draggingId === undefined) {
         draft.find(tile => tile.tileId === tileId)!.style = {
-          backgroundColor: 'var(--tile-hover-color)'
+          backgroundColor: 'var(--tile-hover-color)',
+          cursor: 'pointer'
         }
       } else {
         dragTile(tileId)
