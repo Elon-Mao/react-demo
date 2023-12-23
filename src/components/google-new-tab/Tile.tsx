@@ -13,7 +13,7 @@ export interface TilePropsEx extends TileProps {
   draggingId: React.Key | undefined
   dragStart: (tileId: React.Key) => void
   dragTile: (tileId: React.Key) => void
-  dragEnd: (tileId: React.Key) => void
+  dragEnd: () => void
 }
 
 const Tile: React.FC<TilePropsEx> = ({
@@ -64,8 +64,8 @@ const Tile: React.FC<TilePropsEx> = ({
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
     const mousedownLeft = event.currentTarget.offsetLeft
     const mousedownTop = event.currentTarget.offsetTop
-    const mousedownX = event.clientX
-    const mousedownY = event.clientY
+    const mousedownX = event.pageX
+    const mousedownY = event.pageY
     let isMoved = false
 
     const handleMouseUp = () => {
@@ -74,12 +74,12 @@ const Tile: React.FC<TilePropsEx> = ({
       if (!isMoved) {
         window.open(href)
       }
-      dragEnd(tileId)
+      dragEnd()
     }
 
     const handleMouseMove = (event: MouseEvent) => {
-      const difX = event.clientX - mousedownX
-      const difY = event.clientY - mousedownY
+      const difX = event.pageX - mousedownX
+      const difY = event.pageY - mousedownY
       if (!isMoved) {
         if (Math.abs(difX) > 2 || Math.abs(difY) > 2) {
           isMoved = true

@@ -40,13 +40,11 @@ const App: React.FC = () => {
   }))
   const [draggingId, setDraggingId] = useState<React.Key>()
   const containerRef = useRef<HTMLDivElement>(null)
-  const lastIdRef = useRef<React.Key>(0)
   useEffect(() => {
     containerRef.current!.style.opacity = '1'
   }, [containerRef])
 
   const handleDragStart = (tileId: React.Key) => {
-    lastIdRef.current = tileId
     setDraggingId(tileId)
     updateTiles(draft => {
       draft.forEach((tile, index) => {
@@ -68,21 +66,17 @@ const App: React.FC = () => {
     })
   }
 
-  const handleDragEnd = (tileId: React.Key) => {
+  const handleDragEnd = () => {
     setDraggingId(undefined)
     updateTiles(draft => {
-      const draggingIndex = draft.findIndex(tile => tile.tileId === tileId)
-      const targetIndex = draft.findIndex(tile => tile.tileId === lastIdRef.current)
-      draft.splice(targetIndex, 0, ...draft.splice(draggingIndex, 1))
-      draft.forEach((tile, index) => {
+      [...draft].forEach(tile => {
         delete tile.style
-        tile.positionIndex = index
+        draft[tile.positionIndex!] = tile
       })
     })
   }
 
   const dragTile = (tileId: React.Key) => {
-    lastIdRef.current = tileId
     updateTiles(draft => {
       const draggingTile = draft.find(tile => tile.tileId === draggingId)!
       const draggingIndex = draggingTile.positionIndex!
