@@ -1,0 +1,41 @@
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  font-size: 81.25%;
+}
+
+h2 {
+  width: 700px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.container button:first-child {
+  width: 200px;
+  background-color: aqua;
+}
+
+.add-record-btn {
+  margin-top: 20px;
+  width: 100px;
+  background-color: greenyellow;
+}
+
+.container input {
+  width: 200px;
+}
+
+.record {
+  display: flex;
+  gap: 5px;
+}
+
+.record input {
+  width: 250px;
+}
+
+.record button {
+  background-color: red;
+}
